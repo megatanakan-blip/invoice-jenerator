@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidInvoice(data) {
+      return data.keys().hasAll(['senderCompany', 'invoiceNo', 'invoiceDate', 'totalAmount', 'userId', 'createdAt'])
+        && data.senderCompany is string && data.senderCompany.size() <= 100
+        && data.invoiceNo is string && data.invoiceNo.size() <= 50
+        && data.invoiceDate is string && data.invoiceDate.size() <= 50
+        && data.totalAmount is number
+        && data.userId == request.auth.uid
+        && data.createdAt is string && data.createdAt.size() <= 50;
+    }
+
+    function isValidSenderProfile(data) {
+      return data.keys().hasAll(['profileName', 'senderCompany', 'userId'])
+        && data.profileName is string && data.profileName.size() <= 100
+        && data.senderCompany is string && data.senderCompany.size() <= 100
+        && data.userId == request.auth.uid;
+    }
+
+    function isValidRecipient(data) {
+      return data.keys().hasAll(['companyName', 'userId'])
+        && data.companyName is string && data.companyName.size() <= 100
+        && data.userId == request.auth.uid;
+    }
+
+    // Invoices collection
+    match /invoices/{invoiceId} {
+      allow read, delete: if isSignedIn() && existing().userId == request.auth.uid && isValidId(invoiceId);
+      allow create: if isSignedIn() && isValidInvoice(incoming()) && isValidId(invoiceId);
+      allow update: if isSignedIn() && isValidInvoice(incoming()) && existing().userId == request.auth.uid && incoming().userId == request.auth.uid && isValidId(invoiceId);
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Multiple sender profiles (company, side-business, personal)
+    match /sender_profiles/{profileId} {
+      allow read, delete: if isSignedIn() && existing().userId == request.auth.uid && isValidId(profileId);
+      allow create: if isSignedIn() && isValidSenderProfile(incoming()) && isValidId(profileId);
+      allow update: if isSignedIn() && isValidSenderProfile(incoming()) && existing().userId == request.auth.uid && incoming().userId == request.auth.uid && isValidId(profileId);
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Company profile and user settings legacy fallback
+    match /settings/{settingId} {
+      allow read, write: if isSignedIn() && settingId == request.auth.uid;
+    }
+
+    // Registered clients / billing recipients
+    match /recipients/{recipientId} {
+      allow read, delete: if isSignedIn() && existing().userId == request.auth.uid && isValidId(recipientId);
+      allow create: if isSignedIn() && isValidRecipient(incoming()) && isValidId(recipientId);
+      allow update: if isSignedIn() && isValidRecipient(incoming()) && existing().userId == request.auth.uid && incoming().userId == request.auth.uid && isValidId(recipientId);
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Legacy fallback
+    match /users/{userId}/{document=**} {
+      allow read, write: if isSignedIn() && userId == request.auth.uid;
+    }
+  }
+}

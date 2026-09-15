@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "Invoice": {
+      "title": "Invoice",
+      "description": "An invoice document",
+      "type": "object",
+      "properties": {
+        "senderCompany": { "type": "string" },
+        "senderRepresentative": { "type": "string" },
+        "senderAddress": { "type": "string" },
+        "senderPhone": { "type": "string" },
+        "senderEmail": { "type": "string" },
+        "recipient": { "type": "string" },
+        "recipientPerson": { "type": "string" },
+        "invoiceNo": { "type": "string" },
+        "invoiceDate": { "type": "string" },
+        "subject": { "type": "string" },
+        "bankDetails": { "type": "string" },
+        "remarks": { "type": "string" },
+        "totalAmount": { "type": "number" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderCompany", "invoiceNo", "invoiceDate", "totalAmount", "userId", "createdAt"]
+    },
+    "SenderProfile": {
+      "title": "SenderProfile",
+      "description": "User registered personal and company sender details",
+      "type": "object",
+      "properties": {
+        "profileName": { "type": "string" },
+        "senderCompany": { "type": "string" },
+        "senderRepresentative": { "type": "string" },
+        "senderAddress": { "type": "string" },
+        "senderPhone": { "type": "string" },
+        "senderEmail": { "type": "string" },
+        "bankDetails": { "type": "string" },
+        "remarks": { "type": "string" },
+        "isDefault": { "type": "boolean" },
+        "userId": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["profileName", "senderCompany", "userId"]
+    },
+    "Recipient": {
+      "title": "Recipient",
+      "description": "Saved client or billing recipient company and contact",
+      "type": "object",
+      "properties": {
+        "companyName": { "type": "string" },
+        "contactPerson": { "type": "string" },
+        "notes": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["companyName", "userId"]
+    }
+  },
+  "firestore": {
+    "/invoices/{invoiceId}": {
+      "schema": { "$ref": "Invoice" },
+      "description": "Saved invoices directly stored in Firebase"
+    },
+    "/sender_profiles/{profileId}": {
+      "schema": { "$ref": "SenderProfile" },
+      "description": "User multiple registered sender profiles (company, side-business, personal)"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "SenderProfile" },
+      "description": "Company/sender profile legacy settings fallback"
+    },
+    "/recipients/{recipientId}": {
+      "schema": { "$ref": "Recipient" },
+      "description": "Registered billing recipients / clients"
+    }
+  }
+}

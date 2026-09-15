@@ -1,0 +1,6 @@
+{
+  "name": "Invoice Generator",
+  "description": "A web-based invoice generator printable in A4 format with client and personal sender data registration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
