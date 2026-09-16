@@ -45,6 +45,7 @@ export function ProfileSettingsModal({
   const [formData, setFormData] = useState<Omit<SenderProfile, 'id' | 'userId'>>(INITIAL_FORM_DATA);
   const [isSaving, setIsSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   // Load profiles from Firestore
   useEffect(() => {
