@@ -24,7 +24,9 @@ import {
   Download,
   Image as ImageIcon,
   FileText,
-  AlertTriangle
+  AlertTriangle,
+  Info,
+  User as UserIcon
 } from 'lucide-react';
 import { toCanvas } from 'html-to-image';
 import { jsPDF } from 'jspdf';
@@ -114,6 +116,7 @@ function MainApp({ user, logout }: { user: User, logout: () => void }) {
   const [showList, setShowList] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isRecipientModalOpen, setIsRecipientModalOpen] = useState(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [saveSuccessNotice, setSaveSuccessNotice] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -127,11 +130,11 @@ function MainApp({ user, logout }: { user: User, logout: () => void }) {
       }
     }
     return {
-      senderCompany: '株式会社ビデオチューブ',
+      senderCompany: '株式会社〇×',
       senderRepresentative: '代表取締役 山田 太郎',
       senderAddress: '東京都渋谷区...',
       senderPhone: '03-xxxx-xxxx',
-      senderEmail: 'info@videotube.co.jp',
+      senderEmail: 'info@example.com',
       recipient: '',
       recipientPerson: '',
       invoiceNo: '2026-001',
@@ -416,17 +419,11 @@ function MainApp({ user, logout }: { user: User, logout: () => void }) {
           </div>
 
           <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
-            <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200/90 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-left shadow-2xs flex-1 sm:flex-none">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-              <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold text-emerald-900 flex items-center gap-1 truncate">
-                  <Cloud size={13} className="text-emerald-600 shrink-0" />
-                  <span className="truncate">{user.email}</span>
-                </span>
-                <span className="text-[10px] text-emerald-700 font-medium hidden sm:block">
-                  クラウド保存・同期
-                </span>
-              </div>
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/90 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-left shadow-2xs flex-1 sm:flex-none">
+              <UserIcon size={14} className="text-slate-500 shrink-0" />
+              <span className="text-xs font-semibold text-slate-700 truncate">
+                <span className="truncate">{user.email}</span>
+              </span>
             </div>
             <button
               onClick={logout}
@@ -475,11 +472,14 @@ function MainApp({ user, logout }: { user: User, logout: () => void }) {
             </button>
           </div>
 
-          <div className="hidden sm:flex text-[11px] text-slate-600 items-center gap-1.5">
-            <span className="flex items-center gap-1.5 text-emerald-800 font-medium bg-emerald-100/70 px-2.5 py-1 rounded-md border border-emerald-200/80">
-              <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
-              Firebaseデータベースに直接自動同期中
-            </span>
+          <div className="flex items-center justify-end w-full sm:w-auto mt-2 sm:mt-0 border-t border-slate-200/60 pt-2 sm:border-0 sm:pt-0">
+            <button
+              onClick={() => setIsTermsModalOpen(true)}
+              className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs text-slate-500 hover:text-slate-800 bg-white sm:bg-transparent border border-slate-200 sm:border-0 px-2 py-1.5 sm:p-0 rounded-lg sm:rounded-none transition cursor-pointer w-full sm:w-auto"
+            >
+              <Info size={14} className="shrink-0" />
+              利用上の注意
+            </button>
           </div>
         </div>
 
@@ -1199,6 +1199,59 @@ function MainApp({ user, logout }: { user: User, logout: () => void }) {
         onSelectRecipient={handleSelectRecipient}
         userId={user.uid}
       />
+
+      {/* Terms of Use Modal */}
+      {isTermsModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex justify-center items-center shrink-0">
+                <Info size={20} />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900">
+                利用上の注意・免責事項
+              </h3>
+            </div>
+            
+            <div className="p-4 sm:p-6 overflow-y-auto">
+              <div className="space-y-4 text-sm text-slate-700 leading-relaxed">
+                <p>
+                  本サービス（スマート請求書作成アプリ）をご利用いただきありがとうございます。ご利用にあたり、以下の事項をご確認ください。
+                </p>
+                
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                  <h4 className="font-bold text-blue-900 mb-2 flex items-center gap-1.5">
+                    <Cloud size={16} /> データの保存について
+                  </h4>
+                  <p className="text-blue-800 text-xs sm:text-sm leading-relaxed">
+                    保存された請求書データや自社・取引先情報は、弊社のクラウドシステムにてアカウント（ログインしたGoogleアカウント）ごとに安全に管理・分離されております。他のユーザーからデータが見られることはありません。
+                  </p>
+                </div>
+                
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                  <h4 className="font-bold text-amber-900 mb-2 flex items-center gap-1.5">
+                    <AlertTriangle size={16} /> 免責事項・バックアップのお願い
+                  </h4>
+                  <p className="text-amber-800 text-xs sm:text-sm leading-relaxed">
+                    データの保護には万全を期しておりますが、クラウドサービスはその性質上、予期せぬシステム障害等によりデータが消失する可能性がゼロではありません。<br /><br />
+                    <strong>万が一のデータ紛失による損害について、弊社は一切の責任を負いかねます。</strong><br /><br />
+                    重要な請求書については、本システム上での保存に頼るだけでなく、<strong>定期的にPDFや画像としてローカル環境（お手元のパソコンやスマートフォン）に保存・バックアップ</strong>していただくようお願いいたします。
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 border-t border-slate-100 flex justify-end bg-slate-50">
+              <button
+                onClick={() => setIsTermsModalOpen(false)}
+                className="px-5 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl transition cursor-pointer shadow-sm"
+              >
+                確認して閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
